@@ -1,26 +1,107 @@
 const { ipcRenderer } = require('electron')
+const fs = require('fs');
 
-const itemForm = document.getElementById('item-form')
-const itemNameInput = document.getElementById('item-name')
-const itemCodInput = document.getElementById('item-codigo')
-const itemList = document.getElementById('item-list')
+
 const selectXmlButton = document.getElementById('select-xml')
 const meiaNotaCheckbox = document.getElementById('meia-nota')
 
-itemForm.addEventListener('submit', async (event) => {
-    event.preventDefault()
-    const itemName = itemNameInput.value
-    const itemCod = itemCodInput.value
-    const items = await ipcRenderer.invoke('read-data')
-    items.push({ name: itemName, codigo: itemCod })
-    await ipcRenderer.invoke('write-data', items)
-    renderItems(items)
-    itemNameInput.value = ''
-    itemCodInput.value = ''
+document.getElementById('arquivo-xml').addEventListener('click', ()=>{
+    document.getElementById('tela-xml').style.display = 'block';
+    document.getElementById('wrapper').style.display = 'none';
+    document.getElementById('visualizador-de-dados').style.display = 'none';
+
+})
+document.getElementById('vision-data').addEventListener('click', ()=>{
+    document.getElementById('tela-xml').style.display = 'none';
+    document.getElementById('wrapper').style.display = 'none';
+    document.getElementById('visualizador-de-dados').style.display = 'block';
+})
+document.getElementById('vision-data2').addEventListener('click', ()=>{
+    document.getElementById('tela-xml').style.display = 'none';
+    document.getElementById('wrapper').style.display = 'none';
+    document.getElementById('visualizador-de-dados').style.display = 'block';
+
+})
+document.getElementById('tela-inicial').addEventListener('click', ()=>{
+    document.getElementById('tela-xml').style.display = 'none';
+    document.getElementById('visualizador-de-dados').style.display = 'none';
+
+    document.getElementById('wrapper').style.display = 'block';
+
+})
+document.getElementById('tela-inicial2').addEventListener('click', ()=>{
+    document.getElementById('tela-xml').style.display = 'none';
+    document.getElementById('visualizador-de-dados').style.display = 'none';
+    document.getElementById('wrapper').style.display = 'block';
 })
 
+function loadData() {
+    fs.readFile('data.json', 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading the file:', err);
+            return;
+        }
+        const jsonData = JSON.parse(data);
+        createTable(jsonData);
+    });
+}
+
+function createTable(data) {
+    const table = document.createElement('table');
+    const thead = table.createTHead();
+    const tbody = table.createTBody();
+
+    // Create table headers
+    const headerRow = thead.insertRow();
+    Object.keys(data[0]).forEach(key => {
+        const th = document.createElement('th');
+        th.textContent = key;
+        headerRow.appendChild(th);
+    });
+
+    // Create table rows
+    data.forEach(item => {
+        const row = tbody.insertRow();
+        Object.values(item).forEach(value => {
+            const cell = row.insertCell();
+            cell.textContent = value;
+            cell.contentEditable = 'true';
+        });
+    });
+
+    document.getElementById('data-preview').appendChild(table);
+}
+
+function salvarDados() {
+    const table = document.querySelector('table');
+    if (!table) {
+        console.error('No table found to save data from.');
+        return;
+    }
+
+    const data = [];
+    const rows = table.tBodies[0].rows;
+    const headers = Array.from(table.tHead.rows[0].cells).map(cell => cell.textContent);
+
+    for (const row of rows) {
+        const rowData = {};
+        headers.forEach((header, index) => {
+            rowData[header] = row.cells[index].textContent;
+        });
+        data.push(rowData);
+    }
+
+    fs.writeFile('data.json', JSON.stringify(data, null, 2), 'utf8', (err) => {
+        if (err) {
+            console.error('Error writing to file:', err);
+            return;
+        }
+        console.log('Data successfully saved to data.json');
+    });
+}
 selectXmlButton.addEventListener('click', async () => {
     const xmlData = await ipcRenderer.invoke('select-xml-file')
+    console.log('......')
     const result = extractDetValues(xmlData, [
         'vUnCom', 'xProd', 'NCM', 'CFOP', 'CEST', 'vProd',
         'cEAN', 'qCom', 'uCom', 'qTrib', 'uTrib'
@@ -114,27 +195,12 @@ function processValues(data, meiaNota) {
     })
 }
 
-async function renderItems(items) {
-    itemList.innerHTML = ''
-    items.forEach((item, index) => {
-        const li = document.createElement('li')
-        li.innerHTML = `Name: ${item.nome_produto}, Code: ${item.codigo_de_barras}`
-        const deleteButton = document.createElement('button')
-        deleteButton.textContent = 'Delete'
-        deleteButton.addEventListener('click', async () => {
-            items.splice(index, 1)
-            await ipcRenderer.invoke('write-data', items)
-            renderItems(items)
-        })
-        li.appendChild(deleteButton)
-        itemList.appendChild(li)
-    })
-}
 
-async function initialize() {
-    const items = await ipcRenderer.invoke('read-data')
-    renderItems(items)
-}
+document.getElementById('card-import-xml-pdf').addEventListener('click', ()=>{
+    document.getElementById('wrapper').style.display = 'none';
+    document.getElementById('tela-xml').style.display = 'block';
+})
+
 
 async function grava(newItems) {
     const items = await ipcRenderer.invoke('read-data')
@@ -158,4 +224,3 @@ async function grava(newItems) {
     await ipcRenderer.invoke('write-data', items)
 }
 
-initialize()
