@@ -13,6 +13,11 @@
     "electron": "^31.2.1"
   },
   "dependencies": {
+    "jspdf": "^2.5.1",
+    "pdf-parse": "^1.1.1",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.25.0",
+    "xlsx": "^0.18.5",
     "xml2js": "^0.6.2"
   }
 }

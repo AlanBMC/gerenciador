@@ -1,7 +1,10 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const fs = require('fs')
 const path = require('path')
+const pdfParse = require('pdf-parse')
 const { parseStringPromise } = require('xml2js')
+
+
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -61,5 +64,20 @@ ipcMain.handle('select-xml-file', async () => {
     const filePath = result.filePaths[0]
     const xmlData = fs.readFileSync(filePath, 'utf8')
     return parseStringPromise(xmlData)
+  }
+})
+ipcMain.handle('select-pdf-file', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile'],
+    filters: [{ name: 'PDF Files', extensions: ['pdf'] }]
+  })
+
+  if (result.canceled) {
+    return null
+  } else {
+    const filePath = result.filePaths[0]
+    const pdfData = fs.readFileSync(filePath)
+    const data = await pdfParse(pdfData)
+    return data.text
   }
 })

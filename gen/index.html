@@ -27,7 +27,7 @@
               </svg></i></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#" ><svg xmlns="http://www.w3.org/2000/svg" width="26" height="36" fill="currentColor" class="bi bi-upc-scan" viewBox="0 0 16 16">
+              <a class="nav-link" href="#" id="gerador-de-codigo" ><svg xmlns="http://www.w3.org/2000/svg" width="26" height="36" fill="currentColor" class="bi bi-upc-scan" viewBox="0 0 16 16">
                 <path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11 .5a.5.5 0 0 1 .5-.5h3A1.5 1.5 0 0 1 16 1.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1-.5-.5M.5 11a.5.5 0 0 1 .5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 1 0 1h-3A1.5 1.5 0 0 1 0 14.5v-3a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v3a1.5 1.5 0 0 1-1.5 1.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 .5-.5M3 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5zm3 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0z"/>
               </svg></a>
             </li>
@@ -51,12 +51,12 @@
       
           <div class=" card">
             <div class="card__inner card-import-xml-pdf" id="card-import-xml-pdf">
-              <span>Importacao de XML/PDF</span>
+              <span>Importacao de arquivos</span>
             </div>
           </div>
       
           <div class=" card">
-            <div class="card__inner">
+            <div class="card__inner" id="gerador-de-codigos">
               <span>Criação de codigo & Gerenciamento</span>
             </div>
           </div>
@@ -74,34 +74,58 @@
         </div>
       </div>
 
-
-
-
       <div class="tela-xml" id="tela-xml">
           <h1>Importe o arquivo xml</h1>
         <div>
             <button class="select-file" id="select-xml">Selecione o arquivo XML</button>
-            <input class="check-box" type="checkbox" id="meia-nota">
+            <input class="check-box"  type="checkbox" id="meia-nota">
             <label for="meia-nota">Meia Nota</label>
         </div>
         <div class="secao-pdf">
           <h1>
             importe o arquivo PDF
           </h1>
-          <button class="select-file">buscar PDF</button>
+          <button class="select-file" id="select-pdf">buscar PDF</button>
         </div>
-            <ul id="item-list"></ul>
-            <ul id="xml-keys-list"></ul>
+         
+            <h1>Modos do pdf</h1>
+          
+            <div class="bloco-matematica">
+              <input type="number" class="input-porcentagem" required="" placeholder="porcentagem" autocomplete="off">
+            </div>
     </div>
     <div class="visualizador-de-dados" id="visualizador-de-dados">
       <h1>Visualização dos dados</h1>
       <h3>Manipule os dados</h3>
-      <button onclick="loadData()">Ver todos os dados</button>
-      <button >Ultimos dados</button>
-      <button onclick="salvarDados()">salvar</button>
-      <button>Baixar</button>
+      <button class="select-file" onclick="loadData()">Ver todos os dados</button>
+      <button class="select-file" onclick="ultimosdados()">Ultimos dados</button>
+      <button class="select-file" onclick="salvarDados()">salvar</button>
+      <button class="select-file" id="baixar_todos">Baixar</button>
+      <button class="select-file" id="baixar_ultimos">Baixar os ultimos dados</button>
       <div id="data-preview"></div>
     </div>
+
+    <div class="gerador-codigo-barras" id="gerador-codigo-barras">
+      <h1>Gerador de codigo</h1>
+      <div>
+
+        <label>
+          <input type="radio" name="barcode-prefix" class="input-porcentagem" value="789" checked> 789
+        </label>
+        <label>
+          <input type="radio" name="barcode-prefix" class="input-porcentagem" value="790"> 790
+        </label>
+      </div>
+      <input type="number" id="barcode-count" class="input-porcentagem" placeholder="Quantidade" min="1" value="10">
+      <div>
+        <button class="select-file" id="generate-barcodes-btn">Gerar Códigos de Barras</button>
+      </div>
+      <div id="barcodes-container"></div>
+    </div>
+    </div>
+
+
+
     <script src="./renderer.js"></script>
 </body>
 </html>

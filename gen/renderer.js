@@ -1,39 +1,39 @@
 const { ipcRenderer } = require('electron')
+const { electron } = window
+
 const fs = require('fs');
+const XLSX = require('xlsx');
+const jsPDF = require('jspdf');
+let ultimoArquivoLido = [];
 
 
 const selectXmlButton = document.getElementById('select-xml')
 const meiaNotaCheckbox = document.getElementById('meia-nota')
+const selectPdfButton = document.getElementById('select-pdf')
 
-document.getElementById('arquivo-xml').addEventListener('click', ()=>{
-    document.getElementById('tela-xml').style.display = 'block';
-    document.getElementById('wrapper').style.display = 'none';
-    document.getElementById('visualizador-de-dados').style.display = 'none';
+const sections = {
+    'tela-xml': document.getElementById('tela-xml'),
+    'visualizador-de-dados': document.getElementById('visualizador-de-dados'),
+    'wrapper': document.getElementById('wrapper'),
+    'gerador-codigo-barras': document.getElementById('gerador-codigo-barras')
+};
 
-})
-document.getElementById('vision-data').addEventListener('click', ()=>{
-    document.getElementById('tela-xml').style.display = 'none';
-    document.getElementById('wrapper').style.display = 'none';
-    document.getElementById('visualizador-de-dados').style.display = 'block';
-})
-document.getElementById('vision-data2').addEventListener('click', ()=>{
-    document.getElementById('tela-xml').style.display = 'none';
-    document.getElementById('wrapper').style.display = 'none';
-    document.getElementById('visualizador-de-dados').style.display = 'block';
 
-})
-document.getElementById('tela-inicial').addEventListener('click', ()=>{
-    document.getElementById('tela-xml').style.display = 'none';
-    document.getElementById('visualizador-de-dados').style.display = 'none';
+function showSection(sectionId) {
+    Object.keys(sections).forEach(key => {
+        sections[key].style.display = 'none';
+    });
+    sections[sectionId].style.display = 'block';
+}
 
-    document.getElementById('wrapper').style.display = 'block';
-
-})
-document.getElementById('tela-inicial2').addEventListener('click', ()=>{
-    document.getElementById('tela-xml').style.display = 'none';
-    document.getElementById('visualizador-de-dados').style.display = 'none';
-    document.getElementById('wrapper').style.display = 'block';
-})
+document.getElementById('arquivo-xml').addEventListener('click', () => showSection('tela-xml'));
+document.getElementById('vision-data').addEventListener('click', () => showSection('visualizador-de-dados'));
+document.getElementById('vision-data2').addEventListener('click', () => showSection('visualizador-de-dados'));
+document.getElementById('tela-inicial').addEventListener('click', () => showSection('wrapper'));
+document.getElementById('tela-inicial2').addEventListener('click', () => showSection('wrapper'));
+document.getElementById('gerador-de-codigos').addEventListener('click', () => showSection('gerador-codigo-barras'));
+document.getElementById('gerador-de-codigo').addEventListener('click', () => showSection('gerador-codigo-barras'));
+document.getElementById('card-import-xml-pdf').addEventListener('click', () => showSection('tela-xml'));
 
 function loadData() {
     fs.readFile('data.json', 'utf8', (err, data) => {
@@ -99,6 +99,11 @@ function salvarDados() {
         console.log('Data successfully saved to data.json');
     });
 }
+selectPdfButton.addEventListener('click', async () =>{
+    const pdfData = await ipcRenderer.invoke('select-pdf-file')
+    
+})
+
 selectXmlButton.addEventListener('click', async () => {
     const xmlData = await ipcRenderer.invoke('select-xml-file')
     console.log('......')
@@ -204,7 +209,7 @@ document.getElementById('card-import-xml-pdf').addEventListener('click', ()=>{
 
 async function grava(newItems) {
     const items = await ipcRenderer.invoke('read-data')
-
+    ultimoArquivoLido = newItems;
     newItems.forEach(newItem => {
         const item = {
             nome_produto: newItem['Nome do produto'],
@@ -223,4 +228,75 @@ async function grava(newItems) {
 
     await ipcRenderer.invoke('write-data', items)
 }
+
+function ultimosdados() {
+    createTable(ultimoArquivoLido);
+}
+function ultimosdados_baixar() {
+    return ultimoArquivoLido;
+}
+function generateBarcode(prefix) {
+    if (prefix !== '789' && prefix !== '790') {
+        throw new Error("Prefix must be '789' or '790'");
+    }
+  
+    // Generate the remaining digits
+    let remainingDigits = '';
+    for (let i = 0; i < 9; i++) {
+        remainingDigits += Math.floor(Math.random() * 10).toString();
+    }
+  
+    const fullCode = prefix + remainingDigits;
+  
+    // Calculate the checksum digit for EAN-13
+function calculateChecksum(code) {
+        const sumOdd = code
+            .split('')
+            .filter((_, index) => index % 2 === 0)
+            .reduce((sum, digit) => sum + parseInt(digit), 0);
+        const sumEven = code
+            .split('')
+            .filter((_, index) => index % 2 !== 0)
+            .reduce((sum, digit) => sum + parseInt(digit), 0);
+        const totalSum = sumOdd + sumEven * 3;
+        const checksum = (10 - (totalSum % 10)) % 10;
+        return checksum.toString();
+    }
+  
+    const checksum = calculateChecksum(fullCode);
+    const eanCode = fullCode + checksum;
+  
+    return eanCode;
+  }
+  
+  function displayGeneratedBarcodes(prefix, count) {
+    const barcodesContainer = document.getElementById('barcodes-container');
+    barcodesContainer.innerHTML = ''; // Clear previous barcodes
+    for (let i = 0; i < count; i++) {
+        const barcode = generateBarcode(prefix);
+        const barcodeElement = document.createElement('p');
+        barcodeElement.textContent = barcode;
+        barcodesContainer.appendChild(barcodeElement);
+    }
+  }
+  
+  document.getElementById('generate-barcodes-btn').addEventListener('click', () => {
+    const prefix = document.querySelector('input[name="barcode-prefix"]:checked').value;
+    const count = parseInt(document.getElementById('barcode-count').value, 10);
+    displayGeneratedBarcodes(prefix, count);
+  });
+  document.getElementById('gera-codigos').addEventListener('click', () => {
+    document.getElementById('codigos-de-barras').style.display = 'block';
+  });
+
+function downloadExcel(data, filename) {
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, filename);
+}
+document.getElementById('baixar').addEventListener('click', () => {
+    dados = ultimosdados_baixar()
+    downloadExcel(dados, 'excel_ultimosprodutos')
+});
 
