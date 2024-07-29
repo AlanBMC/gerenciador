@@ -101,8 +101,8 @@ function salvarDados() {
 }
 selectPdfButton.addEventListener('click', async () =>{
     const pdfData = await ipcRenderer.invoke('select-pdf-file')
-    const valor_adicional = document.getElementById('valor-adicional').value
-    const porcentagem = document.getElementById('porcentagem').value
+    const valor_adicional = parseFloat(document.getElementById('valor-adicional').value)
+    const porcentagem = parseFloat(document.getElementById('porcentagem').value)
     
     processapdf(pdfData, valor_adicional, porcentagem)
 })
@@ -110,11 +110,12 @@ function processapdf(pdfData, valor_adicional, porcentagem) {
     const regex = /(.+?)\s+R\$\s+\d+,\d+\s+UN\s+\d+\s+R\$\s+(\d+,\d+)\s+R\$\s+(\d+,\d+)\s+(\d+)\s+(\d+)/g
     const matches = [...pdfData.matchAll(regex)]
     const data = []
-  
+   
     for (const match of matches) {
       const nome_produto = match[1].trim().toUpperCase()
       let valor_unitario = match[2].replace(',', '.')
       valor_unitario = parseFloat(valor_unitario) + valor_adicional
+      
       const valor_revenda = Math.floor(valor_unitario * porcentagem * 10) / 10 
       const valor_total = match[3]
       const codigo_ncm = match[4]
@@ -129,8 +130,16 @@ function processapdf(pdfData, valor_adicional, porcentagem) {
       })
     }
   
-    console.log(data)
+   
+    downloadExcel(data, 'produtos.xlsx')
     
+  }
+
+  function downloadExcel(data, filename) {
+    const ws = XLSX.utils.json_to_sheet(data)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1")
+    XLSX.writeFile(wb, filename)
   }
 selectXmlButton.addEventListener('click', async () => {
     const xmlData = await ipcRenderer.invoke('select-xml-file')
