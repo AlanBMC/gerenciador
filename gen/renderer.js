@@ -101,9 +101,37 @@ function salvarDados() {
 }
 selectPdfButton.addEventListener('click', async () =>{
     const pdfData = await ipcRenderer.invoke('select-pdf-file')
+    const valor_adicional = document.getElementById('valor-adicional').value
+    const porcentagem = document.getElementById('porcentagem').value
     
+    processapdf(pdfData, valor_adicional, porcentagem)
 })
-
+function processapdf(pdfData, valor_adicional, porcentagem) {
+    const regex = /(.+?)\s+R\$\s+\d+,\d+\s+UN\s+\d+\s+R\$\s+(\d+,\d+)\s+R\$\s+(\d+,\d+)\s+(\d+)\s+(\d+)/g
+    const matches = [...pdfData.matchAll(regex)]
+    const data = []
+  
+    for (const match of matches) {
+      const nome_produto = match[1].trim().toUpperCase()
+      let valor_unitario = match[2].replace(',', '.')
+      valor_unitario = parseFloat(valor_unitario) + valor_adicional
+      const valor_revenda = Math.floor(valor_unitario * porcentagem * 10) / 10 
+      const valor_total = match[3]
+      const codigo_ncm = match[4]
+      const codigo_barras = match[5]
+      data.push({
+        "Nome do Produto": nome_produto,
+        "Valor Unitário": valor_unitario.toFixed(2).replace('.', ','),
+        "Valor Total": valor_total,
+        "Código NCM": codigo_ncm,
+        "Código de Barras": codigo_barras,
+        "Valor Revenda": valor_revenda.toFixed(2).replace('.', ',')
+      })
+    }
+  
+    console.log(data)
+    
+  }
 selectXmlButton.addEventListener('click', async () => {
     const xmlData = await ipcRenderer.invoke('select-xml-file')
     console.log('......')
