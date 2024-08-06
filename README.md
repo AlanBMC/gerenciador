@@ -16,8 +16,11 @@ GEN é uma ferramenta para facilar a manipulação de arquivos. O objetivo é ma
 - Manipulação de xml
 - Manipulação basica de pdf
 - Geração de codigo de barras
-- Gerar word/pdf para etiquetas (em desenvolvimento)
 
+
+
+## Finalidade
+A finalidade do projeto foi o gerenciamento de arquivos para facil manipulação dos dados, se familiarizar com as ferramentas utilizadas afim de aprimorar os conhecimentos basicos.
 
 ## Autores
 
