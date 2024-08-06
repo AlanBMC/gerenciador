@@ -1,5 +1,5 @@
 
-# GEN
+# GEN <img src="./logo.png" alt="Logo" width="45" height="40">
 
 GEN é uma ferramenta para facilar a manipulação de arquivos. O objetivo é manipular esses arquivos e separar os dados para facilitar o cadastro dos produtos. 
 
