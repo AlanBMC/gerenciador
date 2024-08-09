@@ -26,3 +26,5 @@ A finalidade do projeto foi o gerenciamento de arquivos para facil manipulação
 
 - [@AlanBMC](https://github.com/AlanBMC)
 
+## Status do projeto
+ - Finalizado
